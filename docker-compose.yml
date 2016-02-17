@@ -1,0 +1,37 @@
+appli:
+  build: "./docker/builds/php-apache"
+  volumes:
+    - ./docker/appli1:/etc/apache2/sites-enabled
+  volumes_from:
+    - appli_data
+  links:
+    - db
+  environment:
+    - "VIRTUAL_HOST=gotcms"
+appli_data:
+  image: php:7-apache
+  volumes:
+    - /var/www/gotcms:/var/www/html:rw
+  command: "true"
+db:
+  image: postgres:9.5
+  ports:
+    - "5432:5432"
+  environment:
+    - "POSTGRES_PASSWORD=12345"
+    - "POSTGRES_USER=fab"
+    - "POSTGRES_DB=gotcms"
+    - "VIRTUAL_HOST=gotcms.bdd" 
+  volumes_from:
+    - data_bdd
+data_bdd:
+  image: postgres:9.5
+  volumes:
+    - /var/lib/postgresql/data
+  command: "true"
+nginx:
+  image: jwilder/nginx-proxy
+  ports:
+    - "80:80"
+  volumes:
+    - /var/run/docker.sock:/tmp/docker.sock:ro
